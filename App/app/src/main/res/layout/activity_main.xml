@@ -1,0 +1,29 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    tools:context="ca.bradj.picloq.app.MainActivity"
+    android:background="#000000">
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/clockImage"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:minHeight="10dp"
+        android:src="@drawable/wallpaper"
+        android:scaleType="fitCenter"
+        android:padding="0dp" />
+
+    <TextClock
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:id="@+id/textClock"
+        android:layout_below="@+id/clockImage"
+        android:textColor="#79C"
+        android:textSize="60dp"
+        android:gravity="center_vertical"
+        android:layout_centerInParent="true" />
+
+</RelativeLayout>
