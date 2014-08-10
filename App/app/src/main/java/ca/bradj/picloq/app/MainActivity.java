@@ -2,18 +2,27 @@ package ca.bradj.picloq.app;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextClock;
+
+import com.google.common.base.Optional;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.json.JSONException;
+
+import java.io.File;
+import java.util.Collection;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -24,14 +33,45 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        TextClock clock = (TextClock) findViewById(R.id.textClock);
+        clock.setTimeZone("UTC");
+
+        updateCurrentImage();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateCurrentImage();
+    }
+
+    private void updateCurrentImage() {
+
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int height = metrics.heightPixels;
         int width = metrics.widthPixels;
 
-        BitmapDrawable bmap = (BitmapDrawable) this.getResources().getDrawable(R.drawable.wallpaper);
-        float bmapWidth = bmap.getBitmap().getWidth();
-        float bmapHeight = bmap.getBitmap().getHeight();
+        ImageView iView = (ImageView) findViewById(R.id.clockImage);
+
+        try {
+            PicsByHour load = PicsByHourUtils.load(this);
+
+            Bitmap bmap = load.getImageAtOrBefore(DateTime.now().withZone(DateTimeZone.UTC));
+            iView.setImageBitmap(bmap);
+
+            RelativeLayout.LayoutParams params = getImageViewProportionParams(height, width, bmap);
+            iView.setLayoutParams(params);
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private RelativeLayout.LayoutParams getImageViewProportionParams(int height, int width, Bitmap bmap) {
+        float bmapWidth = bmap.getWidth();
+        float bmapHeight = bmap.getHeight();
 
         float wRatio = width / bmapWidth;
         float hRatio = height / bmapHeight;
@@ -45,12 +85,7 @@ public class MainActivity extends ActionBarActivity {
         int newBmapWidth = (int) (bmapWidth * ratioMultiplier);
         int newBmapHeight = (int) (bmapHeight * ratioMultiplier);
 
-        ImageView iView = (ImageView) findViewById(R.id.clockImage);
-        iView.setLayoutParams(new RelativeLayout.LayoutParams(newBmapWidth, newBmapHeight));
-
-        TextClock clock = (TextClock) findViewById(R.id.textClock);
-        clock.setTimeZone("UTC");
-
+        return new RelativeLayout.LayoutParams(newBmapWidth, newBmapHeight);
     }
 
 

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TextView
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/forDisplay"
+        android:id="@+id/hourText"
+        android:layout_centerVertical="true"/>
+
+    <Button
+        android:layout_width="60dp"
+        android:layout_height="fill_parent"
+        android:text="@string/plus"
+        android:id="@+id/addPicButton"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textAlignment="gravity"
+        android:textSize="40sp"
+        android:gravity="center" />
+
+    <ImageView
+        android:contentDescription="@string/aPreviewOfThePhoto"
+        android:layout_width="160dp"
+        android:layout_height="fill_parent"
+        android:id="@+id/hourPic"
+        android:layout_toLeftOf="@id/addPicButton"
+       android:layout_marginRight="10dp"
+        android:background="@drawable/willuse" />
+</RelativeLayout>

@@ -23,6 +23,7 @@
             android:name=".SelectPicturesActivity"
             android:label="@string/title_activity_select_pictures" >
         </activity>
+        <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
     </application>
 
 </manifest>

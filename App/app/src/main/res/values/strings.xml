@@ -4,5 +4,8 @@
     <string name="app_name">picloq</string>
     <string name="action_settings">Select Pictures</string>
     <string name="title_activity_select_pictures">Select Pictures</string>
+    <string name="plus">+</string>
+    <string name="aPreviewOfThePhoto">A preview of the photo</string>
+    <string name="forDisplay">For Display</string>
 
 </resources>
