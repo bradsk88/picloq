@@ -7,5 +7,9 @@
     <string name="plus">+</string>
     <string name="aPreviewOfThePhoto">A preview of the photo</string>
     <string name="forDisplay">For Display</string>
+    <string name="brightButton">Bright</string>
+    <string name="dimButton">Dim</string>
+    <string name="vDimButton">V. Dim</string>
+    <string name="hourlyPhoto">hourly photo</string>
 
 </resources>

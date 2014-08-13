@@ -2,28 +2,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
-    tools:context="ca.bradj.picloq.app.MainActivity"
-    android:background="#000000">
+    android:background="#000000"
+    tools:context="ca.bradj.picloq.app.MainActivity">
 
     <ImageView
+        android:id="@+id/clockImage"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/clockImage"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:contentDescription="@string/hourlyPhoto"
         android:minHeight="20dp"
-        android:scaleType="fitCenter"
         android:padding="0dp"
+        android:scaleType="fitCenter"
         android:src="@drawable/error" />
 
+
+    <Button
+        android:id="@+id/dimMedBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/clockImage"
+        android:layout_centerHorizontal="true"
+        android:width="120dp"
+        android:text="@string/dimButton"
+        android:textColor="#79C"
+        android:background="#000" />
+
+    <Button
+        android:id="@+id/dimHiBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/clockImage"
+        android:layout_centerHorizontal="true"
+        android:layout_toLeftOf="@id/dimMedBtn"
+        android:width="120dp"
+        android:text="@string/brightButton"
+        android:background="#000"
+        android:textColor="#79C" />
+
+    <Button
+        android:id="@+id/dimLowBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/clockImage"
+        android:layout_centerHorizontal="true"
+        android:layout_toRightOf="@id/dimMedBtn"
+        android:width="120dp"
+        android:text="@string/vDimButton"
+        android:textColor="#79C"
+        android:background="#000" />
+
     <TextClock
+        android:id="@+id/textClock"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:id="@+id/textClock"
-        android:layout_below="@+id/clockImage"
-        android:textColor="#79C"
-        android:textSize="60dp"
+        android:layout_below="@+id/dimHiBtn"
+        android:layout_centerInParent="true"
         android:gravity="center_vertical"
-        android:layout_centerInParent="true" />
+        android:textColor="#79C"
+        android:textSize="60sp" />
+
 
 </RelativeLayout>

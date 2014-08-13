@@ -2,11 +2,9 @@ package ca.bradj.picloq.app;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -19,7 +17,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +29,6 @@ import com.kbeanie.imagechooser.api.ImageChooserListener;
 import com.kbeanie.imagechooser.api.ImageChooserManager;
 import com.soundcloud.android.crop.Crop;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.File;
@@ -62,24 +58,28 @@ public class SelectPicturesActivity extends Activity {
         }
 
         ListView myListView = (ListView) findViewById(R.id.picturesListView);
-        myListView.setAdapter(new PictureSelectionAdapter());
+        PictureSelectionAdapter adapter = new PictureSelectionAdapter();
+        myListView.setAdapter(adapter);
     }
 
-    private void setPictureForCell(int position, ImageView view) {
+    private void setPictureForCell(int position, ImageView view, View inflate) {
         Optional<File> second = listContents.get(position).second;
         if (second.isPresent()) {
             Bitmap bmp = BitmapFactory.decodeFile(second.get().getAbsolutePath());
-            applyNewImage(view, bmp);
+            applyNewImage(view, inflate, bmp);
             return;
         }
         Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.willuse);
-        applyNewImage(view, bm);
+        applyNewImage(view, inflate, bm);
     }
 
-    private void applyNewImage(ImageView view, Bitmap bm) {
+    private void applyNewImage(ImageView view, View inflate, Bitmap bm) {
         view.setImageBitmap(bm);
-        view.getLayoutParams().height = getNewHeight(view.getLayoutParams().width, bm);
+        int newHeight = getNewHeight(view.getLayoutParams().width, bm);
+        view.getLayoutParams().height = newHeight;
+        inflate.getLayoutParams().height = newHeight;
         view.requestLayout();
+
     }
 
     private int getNewHeight(int width, Bitmap bmp) {
@@ -94,9 +94,7 @@ public class SelectPicturesActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent result) {
-        if (resultCode == RESULT_OK &&
-                (requestCode == ChooserType.REQUEST_PICK_PICTURE ||
-                        requestCode == ChooserType.REQUEST_CAPTURE_PICTURE)) {
+        if (resultCode == RESULT_OK && requestCode == ChooserType.REQUEST_PICK_PICTURE) {
             imageChooserManager.submit(requestCode, result);
         }
 
@@ -167,6 +165,13 @@ public class SelectPicturesActivity extends Activity {
                             try {
                                 boolean result = pic.createNewFile();
                             } catch (IOException e) {
+                                v.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(SelectPicturesActivity.this, "Could not load pic", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                                Log.e("SelectPic", "Failed to load file " + imgFile.getAbsolutePath());
                                 e.printStackTrace();
                             }
                         }
@@ -176,13 +181,26 @@ public class SelectPicturesActivity extends Activity {
                         resultHour = position;
                         Crop crop = new Crop(Uri.fromFile(imgFile));
                         crop.output(outUri).withAspect(4, 3).start(SelectPicturesActivity.this);
-
+                        return;
                     }
+                    v.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(SelectPicturesActivity.this, "Could not load pic", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    Log.e("SelectPic", "Failed to load file " + imgFile.getAbsolutePath());
                 }
 
                 @Override
                 public void onError(String s) {
-                    Log.d("SelectPic", s);
+                    v.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(SelectPicturesActivity.this, "Could not load pic\n\"Recent Pictures\" is buggy\nTry going directly to folder", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    Log.e("SelectPic", "Exception while loading file: " + s);
                 }
             });
             try {
@@ -215,10 +233,11 @@ public class SelectPicturesActivity extends Activity {
             button.setOnClickListener(new OpenImageSelection(position, inflate));
 
             ImageView view = (ImageView) inflate.findViewById(R.id.hourPic);
-            setPictureForCell(position, view);
+            setPictureForCell(position, view, inflate);
 
+            ListView viewById = (ListView) findViewById(R.id.picturesListView);
+            viewById.invalidateViews();
             //TODO: Add "remove photo" button.
-
             return inflate;
         }
     }

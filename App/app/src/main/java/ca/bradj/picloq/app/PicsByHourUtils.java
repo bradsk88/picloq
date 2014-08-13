@@ -72,7 +72,7 @@ public class PicsByHourUtils {
             public Collection<Pair<String, Optional<File>>> withHourStrings() {
 
                 Collection<Pair<String, Optional<File>>> out = Lists.newArrayList();
-                for (int i = 0; i < 23; i++) {
+                for (int i = 0; i < 24; i++) {
                     out.add(new Pair<String, Optional<File>>(i + ":00", listContents.get(i)));
                 }
                 return out;
