@@ -3,34 +3,29 @@ package ca.bradj.picloq.app;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextClock;
-
-import com.google.common.base.Optional;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.json.JSONException;
 
-import java.io.File;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ScheduledExecutorService;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -53,46 +48,35 @@ public class MainActivity extends ActionBarActivity {
         final Button dimHi = (Button) findViewById(R.id.dimHiBtn);
         final Button dimMed = (Button) findViewById(R.id.dimMedBtn);
         final Button dimLo = (Button) findViewById(R.id.dimLowBtn);
+        final SeekBar bar = (SeekBar) findViewById(R.id.dimSeek);
+        bar.setProgress(100);
 
-        dimHi.setOnClickListener(new View.OnClickListener() {
+        dimHi.setOnClickListener(new AdjustAlpha(dimHi, dimMed, dimLo, bar, 1f));
+        dimMed.setOnClickListener(new AdjustAlpha(dimHi, dimMed, dimLo, bar, 0.4f));
+        dimLo.setOnClickListener(new AdjustAlpha(dimHi, dimMed, dimLo, bar, 0.1f));
+
+        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onClick(View view) {
-                ImageView viewById = (ImageView) findViewById(R.id.clockImage);
-                float alpha = 1f;
-                viewById.setAlpha(alpha);
-                dimHi.setAlpha(alpha);
-                dimMed.setAlpha(alpha);
-                dimLo.setAlpha(alpha);
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                new AdjustAlpha(dimHi, dimMed, dimLo, bar, (float) i / 100f).onClick(seekBar);
             }
-        });
 
-        dimMed.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                ImageView viewById = (ImageView) findViewById(R.id.clockImage);
-                float alpha = 0.3f;
-                viewById.setAlpha(alpha);
-                dimHi.setAlpha(alpha);
-                dimMed.setAlpha(alpha);
-                dimLo.setAlpha(alpha);
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                new AdjustAlpha(dimHi, dimMed, dimLo, bar, (float) seekBar.getProgress() / 100f).onClick(seekBar);
             }
-        });
 
-
-        dimLo.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                ImageView viewById = (ImageView) findViewById(R.id.clockImage);
-                float alpha = 0.15f;
-                viewById.setAlpha(alpha);
-                dimHi.setAlpha(alpha);
-                dimMed.setAlpha(alpha);
-                dimLo.setAlpha(alpha);
+            public void onStopTrackingTouch(final SeekBar seekBar) {
+                Timer t = new Timer();
+                t.schedule(new AutoDimSeekBar(seekBar), DateTime.now().plusSeconds(3).toDate());
             }
         });
 
         Timer t = new Timer();
         t.schedule(new ScheduleUpdatePic(), nextHour());
+        t.schedule(new AutoDimSeekBar(bar), DateTime.now().plusSeconds(10).toDate());
+        getWindow().setBackgroundDrawableResource(R.drawable.abc_item_background_holo_dark);
 
     }
 
@@ -186,6 +170,70 @@ public class MainActivity extends ActionBarActivity {
                     Date when = nextHour();
                     t.schedule(new ScheduleUpdatePic(), when);
                     Log.d("UpdateImg", "Scheduled image update for " + when);
+                }
+            });
+        }
+    }
+
+    private class AdjustAlpha implements View.OnClickListener {
+        private final Button dimHi;
+        private final Button dimMed;
+        private final Button dimLo;
+        private final float amount;
+        private final SeekBar bar;
+
+        public AdjustAlpha(Button dimHi, Button dimMed, Button dimLo, SeekBar bar, float amount) {
+            this.dimHi = dimHi;
+            this.dimMed = dimMed;
+            this.dimLo = dimLo;
+            this.amount = amount;
+            this.bar = bar;
+        }
+
+        @Override
+        public void onClick(View view) {
+            float alwaysVisible = Math.max(amount, 0.2f);
+            ImageView viewById = (ImageView) findViewById(R.id.clockImage);
+            viewById.setAlpha(amount);
+            dimHi.setAlpha(alwaysVisible);
+            dimMed.setAlpha(alwaysVisible);
+            dimLo.setAlpha(alwaysVisible);
+            bar.setProgress((int) (amount * 100));
+            bar.setAlpha(alwaysVisible);
+        }
+    }
+
+    private class AutoDimSeekBar extends TimerTask {
+        private final SeekBar seekBar;
+
+        public AutoDimSeekBar(SeekBar seekBar) {
+            this.seekBar = seekBar;
+        }
+
+        @Override
+        public void run() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    final float endAlpha = 0.1f;
+                    Animation animation = new AlphaAnimation(seekBar.getAlpha(), endAlpha);
+                    animation.setDuration(1000);
+                    animation.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            seekBar.setAlpha(endAlpha);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+                    seekBar.startAnimation(animation);
                 }
             });
         }

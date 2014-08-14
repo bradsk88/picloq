@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     android:background="#000000"
-    tools:context="ca.bradj.picloq.app.MainActivity">
+    tools:context="ca.bradj.picloq.app.MainActivity"
+    android:clickable="true">
 
     <ImageView
         android:id="@+id/clockImage"
@@ -25,21 +26,9 @@
         android:layout_below="@+id/clockImage"
         android:layout_centerHorizontal="true"
         android:width="120dp"
-        android:text="@string/dimButton"
+        android:text="Dim"
         android:textColor="#79C"
         android:background="#000" />
-
-    <Button
-        android:id="@+id/dimHiBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/clockImage"
-        android:layout_centerHorizontal="true"
-        android:layout_toLeftOf="@id/dimMedBtn"
-        android:width="120dp"
-        android:text="@string/brightButton"
-        android:background="#000"
-        android:textColor="#79C" />
 
     <Button
         android:id="@+id/dimLowBtn"
@@ -47,9 +36,21 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/clockImage"
         android:layout_centerHorizontal="true"
-        android:layout_toRightOf="@id/dimMedBtn"
+        android:layout_toLeftOf="@id/dimMedBtn"
         android:width="120dp"
         android:text="@string/vDimButton"
+        android:background="#000"
+        android:textColor="#79C" />
+
+    <Button
+        android:id="@+id/dimHiBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/clockImage"
+        android:layout_centerHorizontal="true"
+        android:layout_toRightOf="@id/dimMedBtn"
+        android:text="@string/brightButton"
+        android:width="120dp"
         android:textColor="#79C"
         android:background="#000" />
 
@@ -62,6 +63,13 @@
         android:gravity="center_vertical"
         android:textColor="#79C"
         android:textSize="60sp" />
+
+    <SeekBar
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/dimSeek"
+        android:layout_below="@+id/dimMedBtn"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>
