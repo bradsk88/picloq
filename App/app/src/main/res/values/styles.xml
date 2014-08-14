@@ -3,7 +3,6 @@
     <style name="CustomActionBarTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:actionBarStyle">@style/MyActionBar</item>
         <item name="android:windowBackground">@drawable/splash_centered</item>
-        <item name="android:windowNoTitle">true</item>
     </style>
 
     <!-- ActionBar styles -->
