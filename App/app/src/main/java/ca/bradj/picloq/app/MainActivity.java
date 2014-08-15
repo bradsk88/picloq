@@ -202,6 +202,8 @@ public class MainActivity extends ActionBarActivity {
             dimLo.setAlpha(alwaysVisible);
             bar.setProgress((int) (amount * 100));
             bar.setAlpha(alwaysVisible);
+            Timer t = new Timer();
+            t.schedule(new AutoDimSeekBar(bar), DateTime.now().plusSeconds(3).toDate());
         }
     }
 
