@@ -6,4 +6,8 @@
         android:title="@string/action_settings"
         android:orderInCategory="100"
         app:showAsAction="never" />
+    <item android:id="@+id/action_timezone"
+        android:title="@string/selectTimeZone"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
 </menu>

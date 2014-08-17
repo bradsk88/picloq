@@ -12,5 +12,14 @@
     <string name="vDimButton">V. Dim</string>
     <string name="hourlyPhoto">hourly photo</string>
     <string name="hourlyPic">hourly image</string>
+    <string name="selectTimeZone">Select Time Zone</string>
+    <string name="selectZone">Select your time zone</string>
+    <string name="title_activity_select_time_zone_region">Select Time Zone…</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="load_interstitial">Load Interstitial</string>
+    <string name="interstitial_not_ready">Interstitial Not Ready</string>
+    <string name="banner_in_xml">Banner in XML</string>
+    <string name="banner_in_code">Banner in Code</string>
+    <string name="interstitial">Interstitial</string>
 
 </resources>

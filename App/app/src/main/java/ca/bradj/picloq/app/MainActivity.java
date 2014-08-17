@@ -2,8 +2,10 @@ package ca.bradj.picloq.app;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -11,7 +13,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
@@ -19,6 +20,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextClock;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -28,23 +33,36 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ca.bradj.picloq.app.selectpic.PicsByHour;
+import ca.bradj.picloq.app.selectpic.PicsByHourUtils;
+import ca.bradj.picloq.app.selectpic.SelectPicturesActivity;
+import ca.bradj.picloq.app.zone.SelectTimeZoneActivity;
+import ca.bradj.picloq.app.zone.SelectTimeZoneRegionActivity;
+
+import ca.bradj.picloq.app.Constants;
+import ca.bradj.picloq.app.Constants.Type;
 
 public class MainActivity extends ActionBarActivity {
 
-    private static final java.lang.String NEED_TO_SCHEDULE = "ca.bradj.picloq.app.MainActivity.NEED_TO_SCHEDULE";
+    private static final String DEFAULT_ZONE = DateTimeZone.getDefault().getID();
+    private String userZone = DEFAULT_ZONE;
+    private AdView mAdView;
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        userZone = preferences.getString(AVKey.TIMEZONE, DEFAULT_ZONE);
+
         setContentView(R.layout.activity_main);
 
-        TextClock clock = (TextClock) findViewById(R.id.textClock);
-        DateTimeZone dateTimeZone = DateTimeZone.forID("Europe/London");
-        clock.setTimeZone(dateTimeZone.toString());
-        Log.d("Main", "Time zone in London is " + dateTimeZone);
+        if (Constants.type == Type.FREE) {
+            initializeMonetization();
+        }
 
+        setClockToUserSelectedTimeZone();
         updateCurrentImage();
 
         final Button dimHi = (Button) findViewById(R.id.dimHiBtn);
@@ -82,6 +100,39 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
+    @Override
+    protected void onPause() {
+        if (Constants.type == Type.FREE) {
+            mAdView.pause();
+        }
+        super.onPause();
+    }
+
+    private void initializeMonetization() {
+//        mAdView = new AdView(this);
+        mAdView = new AdView(this);
+        mAdView.setAdUnitId("ca-app-pub-1320975449261808/3956463576");
+        mAdView.setAdSize(AdSize.BANNER);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.mainLayout);
+        layout.addView(mAdView, params);
+        mAdView.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void setClockToUserSelectedTimeZone() {
+
+        TextClock clock = (TextClock) findViewById(R.id.textClock);
+        try {
+            DateTimeZone dateTimeZone = DateTimeZone.forID(userZone);
+            clock.setTimeZone(dateTimeZone.toString());
+            Log.d("Main", "Time zone in London is " + dateTimeZone);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            clock.setTimeZone(DEFAULT_ZONE);
+        }
+    }
+
     private java.util.Date nextHour() {
         DateTime inAnHour = DateTime.now().plusHours(1).plusMinutes(1); //1 minute just in case it lands exactly at 11:59:99 or something.
         DateTime next = new DateTime(inAnHour.getYear(), inAnHour.getMonthOfYear(), inAnHour.getDayOfMonth(), inAnHour.getHourOfDay(), 0);
@@ -91,7 +142,23 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        userZone = preferences.getString(AVKey.TIMEZONE, DEFAULT_ZONE);
+
         updateCurrentImage();
+        setClockToUserSelectedTimeZone();
+
+        if (Constants.type == Type.FREE) {
+            mAdView.resume();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (Constants.type == Type.FREE) {
+            mAdView.destroy();
+        }
+        super.onDestroy();
     }
 
     private void updateCurrentImage() {
@@ -106,7 +173,10 @@ public class MainActivity extends ActionBarActivity {
         try {
             PicsByHour load = PicsByHourUtils.load(this);
 
-            Bitmap bmap = load.getImageAtOrBefore(DateTime.now().withZone(DateTimeZone.forID("Europe/London")));
+            Bitmap bmap = load.getImageAtOrBefore(DateTime.now().withZone(DateTimeZone.forID(userZone)));
+            if (bmap == null) {
+                return;
+            }
             iView.setImageBitmap(bmap);
 
             RelativeLayout.LayoutParams params = getImageViewProportionParams(height, width, bmap);
@@ -114,6 +184,8 @@ public class MainActivity extends ActionBarActivity {
 
 
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
@@ -153,6 +225,11 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, SelectPicturesActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        if (id == R.id.action_timezone) {
+            Intent intent = new Intent(this, SelectTimeZoneRegionActivity.class);
             startActivity(intent);
             return true;
         }

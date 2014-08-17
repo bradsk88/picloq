@@ -1,4 +1,4 @@
-package ca.bradj.picloq.app;
+package ca.bradj.picloq.app.selectpic;
 
 import android.graphics.Bitmap;
 import android.graphics.Path;

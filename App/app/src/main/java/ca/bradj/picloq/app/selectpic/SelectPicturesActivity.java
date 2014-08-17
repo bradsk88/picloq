@@ -1,4 +1,4 @@
-package ca.bradj.picloq.app;
+package ca.bradj.picloq.app.selectpic;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -35,6 +36,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import ca.bradj.picloq.app.R;
+
 public class SelectPicturesActivity extends Activity {
 
     private ImageChooserManager imageChooserManager;
@@ -60,16 +63,19 @@ public class SelectPicturesActivity extends Activity {
         ListView myListView = (ListView) findViewById(R.id.picturesListView);
         PictureSelectionAdapter adapter = new PictureSelectionAdapter();
         myListView.setAdapter(adapter);
+        getWindow().setBackgroundDrawableResource(R.drawable.abc_ab_solid_light_holo);
     }
 
     private void setPictureForCell(int position, ImageView view, View inflate) {
         Optional<File> second = listContents.get(position).second;
+
+        Bitmap bm = null;
         if (second.isPresent()) {
-            Bitmap bmp = BitmapFactory.decodeFile(second.get().getAbsolutePath());
-            applyNewImage(view, inflate, bmp);
-            return;
+            bm = BitmapFactory.decodeFile(second.get().getAbsolutePath());
         }
-        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.willuse);
+        if (bm == null) {
+            bm = BitmapFactory.decodeResource(getResources(), R.drawable.willuse);
+        }
         applyNewImage(view, inflate, bm);
     }
 
@@ -160,7 +166,7 @@ public class SelectPicturesActivity extends Activity {
                     final File imgFile = new File(chosenImage.getFilePathOriginal());
                     if (imgFile.exists()) {
 
-                        final File pic = new File(getFilesDir(), "hour" + position + "." + FileUtils.getFileExtension(imgFile.getAbsolutePath()));
+                        final File pic = new File(getAppFilesDir(), "hour" + position + "." + FileUtils.getFileExtension(imgFile.getAbsolutePath()));
                         if (!pic.exists()) {
                             try {
                                 boolean result = pic.createNewFile();
@@ -240,5 +246,13 @@ public class SelectPicturesActivity extends Activity {
             //TODO: Add "remove photo" button.
             return inflate;
         }
+    }
+    private static File getAppFilesDir() {
+        File filesDir = new File(Environment.getExternalStoragePublicDirectory(
+                "ca.bradj.picloq").getAbsolutePath());
+        if (!filesDir.exists()) {
+            filesDir.mkdirs();
+        }
+        return filesDir;
     }
 }
